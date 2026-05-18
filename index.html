@@ -138,6 +138,36 @@ looke.app
 
 <script src="mobile/javascript/config.js"></script>
 
+<style type="text/css">
+.catalog_logo,
+#logoBar img {
+	left: 50% !important;
+	transform: translateX(-50%);
+}
+
+#bgmToggle {
+	position: fixed;
+	right: 16px;
+	bottom: 16px;
+	width: 42px;
+	height: 42px;
+	border: 0;
+	border-radius: 999px;
+	background: rgba(0, 0, 0, 0.45);
+	color: #fff;
+	font-size: 16px;
+	line-height: 42px;
+	text-align: center;
+	cursor: pointer;
+	z-index: 9999;
+	backdrop-filter: blur(4px);
+	-webkit-backdrop-filter: blur(4px);
+}
+
+#bgmToggle:hover {
+	background: rgba(0, 0, 0, 0.6);
+}
+</style>
 
 
 </head>	
@@ -152,6 +182,67 @@ looke.app
 
 		
 	var sendvisitinfo = function(type,page){};
+
+	(function() {
+		var bgAudio = document.createElement("audio");
+		bgAudio.id = "bgmAudio";
+		bgAudio.src = "files/RUNWAY.MP3";
+		bgAudio.loop = true;
+		bgAudio.preload = "auto";
+		bgAudio.volume = 0.3;
+		bgAudio.setAttribute("playsinline", "playsinline");
+
+		var toggleBtn = document.createElement("button");
+		toggleBtn.id = "bgmToggle";
+		toggleBtn.type = "button";
+		toggleBtn.title = "Pausar música";
+		toggleBtn.setAttribute("aria-label", "Pausar música");
+		toggleBtn.innerHTML = "||";
+
+		function syncButton(isPlaying) {
+			toggleBtn.innerHTML = isPlaying ? "||" : "&#9658;";
+			toggleBtn.title = isPlaying ? "Pausar música" : "Tocar música";
+			toggleBtn.setAttribute("aria-label", isPlaying ? "Pausar música" : "Tocar música");
+		}
+
+		function playAudio() {
+			var p = bgAudio.play();
+			if (p && typeof p.then === "function") {
+				p.then(function() {
+					syncButton(true);
+				}).catch(function() {
+					syncButton(false);
+				});
+			} else {
+				syncButton(!bgAudio.paused);
+			}
+		}
+
+		toggleBtn.addEventListener("click", function() {
+			if (bgAudio.paused) {
+				playAudio();
+			} else {
+				bgAudio.pause();
+				syncButton(false);
+			}
+		});
+
+		document.addEventListener("DOMContentLoaded", function() {
+			document.body.appendChild(bgAudio);
+			document.body.appendChild(toggleBtn);
+			playAudio();
+
+			var unlock = function() {
+				if (bgAudio.paused) {
+					playAudio();
+				}
+				document.removeEventListener("click", unlock);
+				document.removeEventListener("touchstart", unlock);
+			};
+			document.addEventListener("click", unlock, { passive: true });
+			document.addEventListener("touchstart", unlock, { passive: true });
+		});
+	})();
 	
 </script>
 
